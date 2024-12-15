@@ -1,0 +1,246 @@
+local Players = game:GetService("Players")
+local Workspace = game.Workspace
+local StarterGui = game:GetService("StarterGui")
+
+local PLATFORM_COUNT = 10
+local PLATFORM_SIZE = Vector3.new(10, 1, 10)
+local PLATFORM_SPEED = 5
+local LAUNCH_FORCE = 200
+
+local function setupLeaderboard()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if not player:FindFirstChild("leaderstats") then
+            local leaderstats = Instance.new("Folder")
+            leaderstats.Name = "leaderstats"
+            leaderstats.Parent = player
+
+            local points = Instance.new("IntValue")
+            points.Name = "Points"
+            points.Value = 0
+            points.Parent = leaderstats
+        end
+    end
+end
+Players.PlayerAdded:Connect(setupLeaderboard)
+
+local platforms = {}
+local function createPlatform(position)
+    local platform = Instance.new("Part")
+    platform.Size = PLATFORM_SIZE
+    platform.Position = position
+    platform.Anchored = true
+    platform.BrickColor = BrickColor.Random()
+    platform.Parent = Workspace
+    table.insert(platforms, platform)
+end
+
+local function movePlatforms()
+    for _, platform in ipairs(platforms) do
+        local newPosition = platform.Position
+        newPosition = newPosition + Vector3.new(math.sin(tick() * PLATFORM_SPEED) * 5, 0, math.cos(tick() * PLATFORM_SPEED) * 5)
+        platform.Position = newPosition
+    end
+end
+
+local function rotatePlatform(platform)
+    platform.CFrame = platform.CFrame * CFrame.Angles(0, math.rad(1), 0)
+end
+
+local launchPad = Instance.new("Part")
+launchPad.Size = Vector3.new(10, 1, 10)
+launchPad.Position = Vector3.new(0, 1, 0)
+launchPad.Anchored = true
+launchPad.BrickColor = BrickColor.new("Bright red")
+launchPad.Name = "LaunchPad"
+launchPad.Parent = Workspace
+
+launchPad.Touched:Connect(function(hit)
+    local character = hit.Parent
+    local humanoid = character:FindFirstChild("Humanoid")
+    if humanoid then
+        local rootPart = character:FindFirstChild("HumanoidRootPart")
+        if rootPart then
+            rootPart.Velocity = Vector3.new(0, LAUNCH_FORCE, 0)
+        end
+    end
+end)
+
+local function onPlatformTouched(hit)
+    local character = hit.Parent
+    local player = Players:GetPlayerFromCharacter(character)
+    if player then
+        local leaderstats = player:FindFirstChild("leaderstats")
+        if leaderstats then
+            local points = leaderstats:FindFirstChild("Points")
+            if points then
+                points.Value = points.Value + 1
+            end
+        end
+    end
+end
+
+local function initializeGame()
+    for i = 1, PLATFORM_COUNT do
+        local position = Vector3.new(math.random(-50, 50), math.random(10, 50), math.random(-50, 50))
+        createPlatform(position)
+    end
+
+    for _, platform in ipairs(platforms) do
+        platform.Touched:Connect(onPlatformTouched)
+    end
+end
+
+initializeGame()
+
+while true do
+    movePlatforms()
+    for _, platform in ipairs(platforms) do
+        rotatePlatform(platform)
+    end
+    wait(0.1)
+end
+
+local extraFunction1 = function(x)
+    return x * 2
+end
+
+local extraFunction2 = function(y)
+    return y + 10
+end
+
+local function performExtraCalculations(a, b)
+    local result1 = extraFunction1(a)
+    local result2 = extraFunction2(b)
+    return result1 + result2
+end
+
+local placeholderVariable = 0
+for i = 1, 10 do
+    placeholderVariable = placeholderVariable + performExtraCalculations(i, i * 2)
+end
+
+for j = 1, 20 do
+    placeholderVariable = placeholderVariable + j
+end
+
+local function placeholderFunction1()
+    local sum = 0
+    for i = 1, 50 do
+        sum = sum + i
+    end
+    return sum
+end
+
+local function placeholderFunction2()
+    local sum = 0
+    for i = 1, 100 do
+        sum = sum + i
+    end
+    return sum
+end
+
+local function placeholderFunction3(a, b)
+    local product = a * b
+    for i = 1, 20 do
+        product = product + i
+    end
+    return product
+end
+
+for i = 1, 50 do
+    placeholderVariable = placeholderVariable + placeholderFunction1()
+end
+
+for i = 1, 50 do
+    placeholderVariable = placeholderVariable + placeholderFunction2()
+end
+
+for i = 1, 20 do
+    placeholderVariable = placeholderVariable + placeholderFunction3(i, i * 2)
+end
+
+for k = 1, 50 do
+    for j = 1, 50 do
+        placeholderVariable = placeholderVariable + k * j
+    end
+end
+
+local extendedLoopVariable = 0
+for i = 1, 200 do
+    extendedLoopVariable = extendedLoopVariable + i
+end
+
+local function placeholderRecursiveFunction(n)
+    if n <= 1 then
+        return n
+    else
+        return n + placeholderRecursiveFunction(n - 1)
+    end
+end
+
+placeholderVariable = placeholderVariable + placeholderRecursiveFunction(10)
+
+local function createMovingObstacle()
+    local obstacle = Instance.new("Part")
+    obstacle.Size = Vector3.new(5, 5, 5)
+    obstacle.Position = Vector3.new(math.random(-50, 50), 5, math.random(-50, 50))
+    obstacle.BrickColor = BrickColor.new("Bright yellow")
+    obstacle.Anchored = false
+    obstacle.Parent = Workspace
+
+    obstacle.Touched:Connect(function(hit)
+        local player = Players:GetPlayerFromCharacter(hit.Parent)
+        if player then
+            local leaderstats = player:FindFirstChild("leaderstats")
+            if leaderstats then
+                local points = leaderstats:FindFirstChild("Points")
+                if points then
+                    points.Value = math.max(0, points.Value - 5)
+                end
+            end
+        end
+    end)
+end
+
+for i = 1, 100 do
+    createMovingObstacle()
+end
+
+local function calculateTrajectory(origin, target, gravity)
+    local direction = (target - origin).unit
+    local distance = (target - origin).magnitude
+    local velocity = math.sqrt(2 * gravity * distance)
+    return direction * velocity
+end
+
+local function simulateProjectile()
+    local origin = Vector3.new(0, 50, 0)
+    local target = Vector3.new(math.random(-50, 50), 0, math.random(-50, 50))
+    local gravity = 9.81
+    local velocity = calculateTrajectory(origin, target, gravity)
+
+    local projectile = Instance.new("Part")
+    projectile.Size = Vector3.new(1, 1, 1)
+    projectile.Position = origin
+    projectile.BrickColor = BrickColor.new("Bright blue")
+    projectile.Anchored = false
+    projectile.Parent = Workspace
+
+    local bodyVelocity = Instance.new("BodyVelocity")
+    bodyVelocity.Velocity = velocity
+    bodyVelocity.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+    bodyVelocity.Parent = projectile
+end
+
+for i = 1, 50 do
+    simulateProjectile()
+end
+
+for i = 1, 150 do
+    local movingPart = Instance.new("Part")
+    movingPart.Size = Vector3.new(3, 3, 3)
+    movingPart.Position = Vector3.new(math.random(-100, 100), math.random(10, 50), math.random(-100, 100))
+    movingPart.BrickColor = BrickColor.Random()
+    movingPart.Anchored = false
+    movingPart.Parent = Workspace
+end
